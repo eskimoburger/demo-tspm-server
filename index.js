@@ -53,6 +53,10 @@ app.use("/final-course", finalCourseRoute);
 app.use("/final-profile", finalProfileRoute);
 app.use("/final-fetch", finalFetchRoute);
 
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
 const port = process.env.PORT || 3001;
 
 app.listen(port, (req, res) => {
