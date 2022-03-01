@@ -24,7 +24,7 @@ evokeRoutes(app);
 
 app.use(express.static("public/uploads/"));
 
-const userRoute = require("./routes/user");
+const userRoute = require("./routes/User");
 app.use("/user", userRoute);
 
 const studentRoute = require("./routes/UserDetail");
