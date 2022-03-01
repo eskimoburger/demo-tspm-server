@@ -53,13 +53,24 @@
 // }
 
 // handleDisconnect();
+// const mysql = require('mysql2')
+// var db = mysql.createConnection({
+//   host: 'localhost',
+//   user: 'root',
+//   password: '',
+//   database: 'cpe08',
+//   multipleStatements: true
+  
+// })
 const mysql = require('mysql2')
 var db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'cpe08',
-  multipleStatements: true
+  host: 'exbodcemtop76rnz.cbetxkdyhwsb.us-east-1.rds.amazonaws.com	',
+  user: 'xjrben7pa20ve2ms',
+  password: 'ucwst4ismkxsk7n5',
+  database: 'jsanxxmbidb1wksg',
+  multipleStatements: true, 
+  port:3306
+  
   
 })
 
