@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const app = express();
 const finalRoute = require("./routes/finalProject");
 const finalTeacherRoute = require("./routes/finalTeacher");
@@ -8,7 +9,7 @@ const finalProfileRoute = require("./routes/finalProfile");
 const finalFetchRoute = require("./routes/finalFetchAll");
 global.__basedir = __dirname;
 
-app.use(express.static("public/uploads/"));
+app.use(express.static(path.join(__dirname,"public/uploads/")));
 
 app.use(cors());
 app.use(express.json());
@@ -61,6 +62,7 @@ const port = process.env.PORT || 3001;
 
 app.listen(port, (req, res) => {
   console.log("Server running...");
+  console.log(path.join(__dirname,"public/uploads/"))
 });
 
 

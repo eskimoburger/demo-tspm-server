@@ -64,7 +64,7 @@
 // })
 const mysql = require('mysql2')
 var db = mysql.createConnection({
-  host: 'exbodcemtop76rnz.cbetxkdyhwsb.us-east-1.rds.amazonaws.com	',
+  host: 'exbodcemtop76rnz.cbetxkdyhwsb.us-east-1.rds.amazonaws.com',
   user: 'xjrben7pa20ve2ms',
   password: 'ucwst4ismkxsk7n5',
   database: 'jsanxxmbidb1wksg',
