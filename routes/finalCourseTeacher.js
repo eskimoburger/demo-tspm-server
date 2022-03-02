@@ -267,7 +267,7 @@ router.get("/get-final-file/:idProject", (req, res) => {
 
     if (result.length >= 0) {
       const fullUrl =
-        req.protocol + "://" + req.get("host") + "/" + result[0]?.final_file;
+        req.protocol + "s://" + req.get("host") + "/" + result[0]?.final_file;
       res.send(fullUrl);
     } else {
       res.status(404).send("No data");
