@@ -7,9 +7,9 @@ router.put("/confirm-state1/:teacherId/:status", (req, res) => {
   const { projectName, description, idNotification } = req.body;
 
   var query_status1_teacher =
-    "UPDATE committee_project SET status = 1  WHERE id_teacher = ? and project_name_eng = ?;";
+    "UPDATE committee_project SET status = 1  WHERE id_teacher = ? ;";
   var query_status2_teacher =
-    "UPDATE committee_project SET status = 2  WHERE id_teacher = ? and project_name_eng = ?;";
+    "UPDATE committee_project SET status = 2  WHERE id_teacher = ? ;";
   var query_delete_notification = "DELETE FROM notification WHERE id_noti = ?;";
   var query_add_log_notification =
     "INSERT INTO log_notifications (id_teacher,description) VALUES (?,?);";
@@ -21,7 +21,7 @@ router.put("/confirm-state1/:teacherId/:status", (req, res) => {
       query_status1_teacher +
         query_delete_notification +
         query_add_log_notification,
-      [teacherId, projectName, idNotification, teacherId, description],
+      [teacherId, idNotification, teacherId, description],
       (err, results) => {
         if (err) {
           console.log(err);
@@ -37,7 +37,7 @@ router.put("/confirm-state1/:teacherId/:status", (req, res) => {
       query_status2_teacher +
         query_delete_notification +
         query_add_log_notification,
-      [teacherId, projectName, idNotification, teacherId, description],
+      [teacherId, idNotification, teacherId, description],
       (err, results) => {
         if (err) {
           console.log(err);
@@ -421,7 +421,6 @@ router.get("/final-exam-result/:idProject", (req, res) => {
   );
 });
 
-
 //in progress
 
 router.put("/validation-state10/:teacherId/:idProject", (req, res) => {
@@ -458,14 +457,19 @@ router.put("/validation-state10/:teacherId/:idProject", (req, res) => {
       if (err) {
         console.log(err);
       } else {
-        const CheckIsOne = (number) => number == 1;
-        var Test = [];
+        let Test = [];
         if (results[1].length > 0) {
+          function checkStatus(status) {
+            return status === 1;
+          }
           results[1].map((result) => {
             Test.push(result.status_state10);
           });
-          
-          if (Check) {
+          const CheckIsOne = Test.every(checkStatus);
+          console.log(Test);
+          console.log(CheckIsOne);
+
+          if (CheckIsOne) {
             db.query(
               query_add_notification_advisor,
               [`${idProject}`, stateName, results[2][0].id_teacher, idProject],
@@ -477,6 +481,7 @@ router.put("/validation-state10/:teacherId/:idProject", (req, res) => {
                 }
               }
             );
+            //res.send(Test);
 
             // res.send({
             //   status: true,
@@ -502,14 +507,51 @@ router.put("/validation-state10/:teacherId/:idProject", (req, res) => {
   // res.send("EIEI")
 });
 
+router.get("/test", (req, res) => {
+  console.log(__basedir);
+});
 
-router.get("/test",(req,res)=>{
-  console.log(__basedir)
-  
-})
+router.get("/get-project/:id", (req, res) => {
+  const { id } = req.params;
+  const query_data_project = "SELECT * FROM test_data_project WHERE id = ?; ";
+  const query_data_committee =
+    "SELECT *,committee_name AS teacher_name FROM committee_project WHERE project_id = ?;";
+  const query_data_member =
+    "SELECT test_project.members AS id , CONCAT(test_students.prefix_th,' ',test_students.student_name_th,' ',test_students.student_lastname_th) AS name FROM test_project INNER JOIN test_students ON test_project.members = test_students.student_id WHERE id_project = ? ;";
+  db.query(
+    query_data_project + query_data_committee + query_data_member,
+    [id, id, id],
+    (err, results) => {
+      if (err) throw err;
+      res.send({
+        data: {
+          project_details: results[0][0],
+          committees: results[1],
+          members: results[2],
+        },
+      });
+    }
+  );
+});
 
+router.put("/validation-state11/:idProject", (req, res) => {
+  const { idProject, teacherId } = req.params;
+  const { idNotification } = req.body;
+  var query_delete_notification = "DELETE FROM notification WHERE id_noti = ?;";
+  var query_update_final_status_data_project =
+    "UPDATE test_data_project SET final_status=1 WHERE id= ?;";
 
+  // var query_add_log_notification =
+  //   "INSERT INTO log_notifications (id_teacher,description) VALUES (?,?);";
 
-
+  db.query(
+    query_update_final_status_data_project + query_delete_notification,
+    [idProject, idNotification],
+    (err, results) => {
+      if (err) throw err;
+      res.send(results);
+    }
+  );
+});
 
 module.exports = router;

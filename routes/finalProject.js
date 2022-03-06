@@ -250,9 +250,9 @@ router.post("/cancel/:idProject", (req, res) => {
   var query_del_committee =
     "DELETE FROM committee_project WHERE project_id = ?;";
   var query_del_notification =
-    "DELETE FROM notification WHERE id_project = ? ;";
+    "DELETE FROM notification WHERE id_project = ? AND state_name = ?; ";
   var query_del_file =
-    "DELETE FROM test_project_file WHERE id_project = ? AND state_name = ?;";
+    "DELETE FROM test_project_file WHERE id_project = ? ";
 
   db.query(
     query_del_data_project +
@@ -260,7 +260,7 @@ router.post("/cancel/:idProject", (req, res) => {
       query_del_committee +
       query_del_notification +
       query_del_file,
-    [idProject, idProject, idProject, idProject, idProject, stateName],
+    [idProject, idProject, idProject, idProject,stateName, idProject, ],
     (err, results) => {
       if (err) {
         res.send({ status: false, message: err.message });
@@ -398,7 +398,7 @@ router.post("/state-1/change/:idProject", (req, res) => {
   var query_add_new_teacher =
     "INSERT INTO committee_project (committee_name,role,id_teacher,project_name_eng,project_id) VALUES ?;";
   var query_add_notification =
-    "INSERT INTO notification (description,state_name,id_teacher,project_name_eng) VALUES ?;";
+    "INSERT INTO notification (description,state_name,id_teacher,project_name_eng,id_project) VALUES ?;";
 
   db.query(
     query_del_old_teacher + query_add_new_teacher + query_add_notification,
@@ -417,6 +417,7 @@ router.post("/state-1/change/:idProject", (req, res) => {
         stateName,
         teacher.teacher.id,
         project_eng,
+        idProject
       ]),
     ],
     (err, results) => {

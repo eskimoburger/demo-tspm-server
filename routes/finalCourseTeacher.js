@@ -427,4 +427,20 @@ router.get("/get-logbook/:idProject", (req, res) => {
   });
 });
 
+
+router.get("/get-length-project",(req,res)=>{
+  const query_count_project = "SELECT COUNT(id) AS all_project   FROM test_data_project"
+  db.query(query_count_project,(err,results) => {
+    if(err) {
+      res.send(err)
+    }
+    if(results.length >= 0){
+      res.send(results[0]);
+
+    }
+    
+  })
+
+})
+
 module.exports = router;
