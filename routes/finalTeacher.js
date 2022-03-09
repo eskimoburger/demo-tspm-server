@@ -507,6 +507,101 @@ router.put("/validation-state10/:teacherId/:idProject", (req, res) => {
   // res.send("EIEI")
 });
 
+router.put("/validation-state10-edit/:teacherId/:idProject", (req, res) => {
+  const { idProject, teacherId } = req.params;
+  const { idNotification, description, edit } = req.body;
+  const stateName = "ยืนยันบันทึกผลการสอบโครงงาน";
+
+  var query_validation_state10 =
+    "UPDATE committee_project set status_state10=1 WHERE project_id=? AND id_teacher=?;";
+
+  var query_validation_state10_edit =
+    "UPDATE final_exam_results SET exam_details=CONCAT(exam_details, ?) WHERE id_teacher=? and id_project=? ; ";
+
+  var query_delete_notification = "DELETE FROM notification WHERE id_noti = ?;";
+  var query_status_state10 =
+    "SELECT committee_project.status_state10 FROM committee_project WHERE project_id = ?;";
+
+  // var query_get_advisor =
+  //   ` SELECT committee_project.id_teacher FROM committee_project WHERE project_id = ? AND role='อาจารย์ที่ปรึกษา';`;
+  var query_add_notification_advisor =
+    "INSERT INTO notification (description,state_name,id_teacher,id_project) VALUES (?,?,?,?);";
+
+  // //var query_add_log_notification =
+  //   "INSERT INTO log_notifications (id_teacher,description) VALUES (?,?);";
+
+  console.log(idProject, idNotification, description, edit);
+
+  db.query(
+    query_validation_state10 +
+    query_validation_state10_edit +
+    query_status_state10 +
+    //query_get_advisor
+    query_delete_notification
+,
+    [
+      idProject,
+      teacherId,
+      edit,
+      teacherId,
+      idProject,
+      idProject,
+      // idNotification,
+    ],
+    (err, results) => {
+      if (err) {
+        console.log(err);
+      }
+
+      res.send("complete");
+      // else {
+      //   let Test = [];
+      //   if (results[2].length > 0) {
+      //     function checkStatus(status) {
+      //       return status === 1;
+      //     }
+      //     results[2].map((result) => {
+      //       Test.push(result.status_state10);
+      //     });
+      //     const CheckIsOne = Test.every(checkStatus);
+      //     console.log(Test);
+      //     console.log(CheckIsOne);
+
+      //     if (CheckIsOne) {
+      //       // db.query(
+      //       //   query_add_notification_advisor,
+      //       //   [`${idProject}`, stateName, results[4][0].id_teacher, idProject],
+      //       //   (err_notification, results_notification) => {
+      //       //     if (err_notification) {
+      //       //       console.log(err_notification);
+      //       //     } else {
+      //       //       res.send("Send Complete!!");
+      //       //     }
+      //       //   }
+      //       // );
+      //       //res.send(Test);
+
+      //       // res.send({
+      //       //   status: true,
+      //       //   TestArray: Test,
+      //       //   message: "Hello true",
+      //       //   advisor: results[2][0].id_teacher,
+      //       // });
+      //     } else {
+      //       res.send({
+      //         status: false,
+      //         TestArray: Test,
+      //         message: "Hello false",
+      //       });
+      //     }
+      //   } else {
+      //     res.send("No data In this Project");
+      //   }
+      // }
+    }
+  );
+});
+
 router.get("/test", (req, res) => {
   console.log(__basedir);
 });
@@ -552,6 +647,34 @@ router.put("/validation-state11/:idProject", (req, res) => {
       res.send(results);
     }
   );
+});
+
+router.get("/count-project/:idTeacher", (req, res) => {
+  const { idTeacher } = req.params;
+  const query_count_project =
+    "SELECT COUNT(test_data_project.id) AS allP  FROM committee_project INNER JOIN test_data_project ON committee_project.project_id = test_data_project.id  WHERE id_teacher = ?;";
+  const query_count_project_resume =
+    "SELECT COUNT(test_data_project.id) AS allR  FROM committee_project INNER JOIN test_data_project ON committee_project.project_id = test_data_project.id  WHERE id_teacher = ? AND test_data_project.state < 14;";
+  const query_count_project_success =
+    "SELECT COUNT(test_data_project.id) AS allS  FROM committee_project INNER JOIN test_data_project ON committee_project.project_id = test_data_project.id  WHERE id_teacher = ? AND test_data_project.state = 14;";
+  db.query(
+    query_count_project +
+      query_count_project_resume +
+      query_count_project_success,
+    [idTeacher, idTeacher, idTeacher],
+    (err, results) => {
+      if (err) {
+        res.send(err);
+      } else {
+        res.send({
+          allP: results[0][0]?.allP,
+          allR: results[1][0]?.allR,
+          allS: results[2][0]?.allS,
+        });
+      }
+    }
+  );
+  //res.send("Hello" + idTeacher);
 });
 
 module.exports = router;

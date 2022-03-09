@@ -251,8 +251,7 @@ router.post("/cancel/:idProject", (req, res) => {
     "DELETE FROM committee_project WHERE project_id = ?;";
   var query_del_notification =
     "DELETE FROM notification WHERE id_project = ? AND state_name = ?; ";
-  var query_del_file =
-    "DELETE FROM test_project_file WHERE id_project = ? ";
+  var query_del_file = "DELETE FROM test_project_file WHERE id_project = ? ";
 
   db.query(
     query_del_data_project +
@@ -260,7 +259,7 @@ router.post("/cancel/:idProject", (req, res) => {
       query_del_committee +
       query_del_notification +
       query_del_file,
-    [idProject, idProject, idProject, idProject,stateName, idProject, ],
+    [idProject, idProject, idProject, idProject, stateName, idProject],
     (err, results) => {
       if (err) {
         res.send({ status: false, message: err.message });
@@ -417,7 +416,7 @@ router.post("/state-1/change/:idProject", (req, res) => {
         stateName,
         teacher.teacher.id,
         project_eng,
-        idProject
+        idProject,
       ]),
     ],
     (err, results) => {
@@ -879,7 +878,7 @@ router.post("/delete-project/:idProject", (req, res) => {
             query_delete_project_data +
             query_delete_committees +
             query_delete_members +
-            query_delete_files  ,
+            query_delete_files,
           [
             committees.map((c) => {
               return [results.insertId, parseInt(c.id_teacher), c.role];
@@ -900,10 +899,6 @@ router.post("/delete-project/:idProject", (req, res) => {
       }
     }
   );
-
-
-
-
 
   //console.log(req.body.projectData);
   //console.log(pathToDir)
@@ -936,7 +931,6 @@ router.get("/mid-exam-result/:idProject", (req, res) => {
   );
 });
 
-
 router.get("/final-exam-result/:idProject", (req, res) => {
   const idProject = req.params.idProject;
 
@@ -953,11 +947,42 @@ router.get("/final-exam-result/:idProject", (req, res) => {
       } else {
         res.send({
           status: true,
-          exam_result: results[1],  
+          exam_result: results[1],
         });
       }
     }
   );
+});
+
+router.get("/get-asses-results/:idProject", (req, res) => {
+  const { idProject } = req.params;
+  const query_asses_results = "SELECT * FROM asses WHERE id_project = ?;";
+  const query_asses_members =
+    "SELECT  asses_student.id_student,asses_student.student1,asses_student.student2,asses_student.student3,asses_student.student4,CONCAT(test_students.prefix_th,' ',test_students.student_name_th,' ',test_students.student_lastname_th) AS name FROM asses_student INNER JOIN test_students ON asses_student.id_student = test_students.student_id WHERE id_project = ? ;";
+
+  db.query(
+    query_asses_results + query_asses_members,
+    [idProject, idProject],
+    (err, results) => {
+      if (err) {
+        res.send(err);
+      } else {
+        res.send({ asses_project: results[0][0], asses_member: results[1] });
+      }
+    }
+  );
+});
+
+
+router.get("/get-asses-final/:idProject/:time", (req, res) => {
+  const { idProject, time } = req.params;
+  const query_asses =
+    "SELECT * FROM final_assess WHERE id_project = ?  AND times = ?";
+
+  db.query(query_asses, [idProject, time], (err, results) => {
+    if (err) throw err;
+    res.send(results);
+  });
 });
 
 module.exports = router;

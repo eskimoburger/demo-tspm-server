@@ -77,8 +77,8 @@ router.get("/test/:id", (req, res) => {
 
 router.get("/get/:id", (req, res) => {
   const id = req.params.id;
-  
-  console.log(id)
+
+  console.log(id);
   db.query(
     `SELECT * from test_students WHERE student_id = ?`,
     [id],
@@ -86,58 +86,101 @@ router.get("/get/:id", (req, res) => {
       if (err) {
         console.log(err);
         //res.send((err))
-      } 
-      else {
-        var status = null
-        var fullUrl = req.protocol + "://" + req.get("host") + "/imagesProfiles" + "/" + results[0].pic;
-        var noImage = req.protocol + "://" + req.get("host") + "/imagesProfiles" + "/" + "noimage.jpg";
+      } else {
+        var status = null;
+        var fullUrl =
+          req.protocol +
+          "://" +
+          req.get("host") +
+          "/imagesProfiles" +
+          "/" +
+          results[0].pic;
+        var noImage =
+          req.protocol +
+          "://" +
+          req.get("host") +
+          "/imagesProfiles" +
+          "/" +
+          "noimage.jpg";
         var picture = "";
         if (results[0].pic === "ยังไม่มีรายละเอียด") {
           picture = noImage;
-          status = false
+          status = false;
+        } else {
+          picture = fullUrl;
+          status = true;
         }
-        else{
-          picture = fullUrl
-          status = true
-        }
-        res.send({ dataStudent: results[0], picture: {status : status , data:picture} });
+        res.send({
+          dataStudent: results[0],
+          picture: { status: status, data: picture },
+        });
       }
     }
   );
 });
 
+router.post("/check/:idStudent", (req, res) => {
+  const idStudent = req.params.idStudent;
+  const { oldPassword, newPassword } = req.body;
 
-router.post("/check/:idStudent",(req,res)=>{
-  const idStudent = req.params.idStudent
-  const {oldPassword,newPassword} =  req.body
-  
-  
-  db.query("SELECT * FROM students_reg_fortest WHERE username = ?  ",[idStudent],async (err,results)=>{
-    if(err){
-      console.log(err)
-    }else{ 
-      const hash = await bcrypt.compare(oldPassword, results[0].password);
-      if(hash){
-        const salt = await bcrypt.genSalt();
-        const hashPassword = await bcrypt.hash(newPassword, salt);
-        //res.send(hashPassword)
-        db.query("UPDATE students_reg_fortest SET password = ? WHERE username = ?  ",[hashPassword,idStudent],(err1,results1)=>{
-          if(err1){
-            console.log(err1)
-          }
-          else{
-            res.send({status:true})
-          }
-        })
+  db.query(
+    "SELECT * FROM students_reg_fortest WHERE username = ?  ",
+    [idStudent],
+    async (err, results) => {
+      if (err) {
+        console.log(err);
+      } else {
+        const hash = await bcrypt.compare(oldPassword, results[0].password);
+        if (hash) {
+          const salt = await bcrypt.genSalt();
+          const hashPassword = await bcrypt.hash(newPassword, salt);
+          //res.send(hashPassword)
+          db.query(
+            "UPDATE students_reg_fortest SET password = ? WHERE username = ?  ",
+            [hashPassword, idStudent],
+            (err1, results1) => {
+              if (err1) {
+                console.log(err1);
+              } else {
+                res.send({ status: true });
+              }
+            }
+          );
+        } else {
+          res.send({ status: false });
+        }
       }
-      else
-      {res.send({status:false})}  
     }
-  })
+  );
+});
 
+router.put("/edit", (req, res) => {
+  //const { idStudent } = req.params;
+  const { editStudent } = req.body;
+  const query_edit_profile =
+    "UPDATE test_students SET  student_name_th = ? ,student_lastname_th = ? , student_name_eng = ? ,student_lastname_eng = ?, student_email=?,phone = ?,nickname = ? WHERE student_id = ? ;  ";
+  db.query(query_edit_profile, [
+    editStudent.student_name_th,
+    editStudent.student_lastname_th,
+    editStudent.student_name_eng,
+    editStudent.student_lastname_eng,
+    editStudent.student_email,
+    editStudent.phone,
+    editStudent.nickname,
+    editStudent.student_id
+  ],(err, results) => {
+    if(err){
+      res.send(err)
+      console.log(err)
+    }
+    else{
+      res.send("Edit Successfully")
+    }
+   
+  });
+  // console.log(editStudent);
 
-
-  
-})
+  // res.send(editStudent);
+});
 
 module.exports = router;
