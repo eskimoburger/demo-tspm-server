@@ -506,101 +506,196 @@ router.put("/validation-state10/:teacherId/:idProject", (req, res) => {
   // console.log(idProject)
   // res.send("EIEI")
 });
-
-router.put("/validation-state10-edit/:teacherId/:idProject", (req, res) => {
+router.put("/validation-state10-test/:teacherId/:idProject", (req, res) => {
   const { idProject, teacherId } = req.params;
   const { idNotification, description, edit } = req.body;
   const stateName = "ยืนยันบันทึกผลการสอบโครงงาน";
 
-  var query_validation_state10 =
-    "UPDATE committee_project set status_state10=1 WHERE project_id=? AND id_teacher=?;";
+  var query_update_final_status =
+    "UPDATE committee_project SET status_state10=1 WHERE id_teacher = ? AND project_id= ?;";
 
   var query_validation_state10_edit =
-    "UPDATE final_exam_results SET exam_details=CONCAT(exam_details, ?) WHERE id_teacher=? and id_project=? ; ";
+    " UPDATE mid_exam_results SET exam_details = CONCAT(exam_details, ? ) WHERE id_teacher = ? and id_project = ?;";
 
   var query_delete_notification = "DELETE FROM notification WHERE id_noti = ?;";
+
+  var query_add_log_notification =
+    "INSERT INTO log_notifications (id_teacher,description) VALUES (?,?);";
+
   var query_status_state10 =
     "SELECT committee_project.status_state10 FROM committee_project WHERE project_id = ?;";
 
-  // var query_get_advisor =
-  //   ` SELECT committee_project.id_teacher FROM committee_project WHERE project_id = ? AND role='อาจารย์ที่ปรึกษา';`;
+  var query_get_advisor =
+    "SELECT id_teacher FROM committee_project WHERE project_id = ? AND role='อาจารย์ที่ปรึกษา';";
   var query_add_notification_advisor =
     "INSERT INTO notification (description,state_name,id_teacher,id_project) VALUES (?,?,?,?);";
-
-  // //var query_add_log_notification =
-  //   "INSERT INTO log_notifications (id_teacher,description) VALUES (?,?);";
-
-  console.log(idProject, idNotification, description, edit);
+  var query_validation_state10_edit =
+    "UPDATE final_exam_results SET exam_details=CONCAT(exam_details, ?) WHERE id_teacher=? and id_project=? ;  ";
 
   db.query(
-    query_validation_state10 +
-    query_validation_state10_edit +
-    query_status_state10 +
-    //query_get_advisor
-    query_delete_notification
-,
+    query_update_final_status +
+      query_status_state10 +
+      query_get_advisor +
+      query_validation_state10_edit +
+      query_delete_notification,
     [
-      idProject,
       teacherId,
+      idProject,
+      idProject,
+      idProject,
       edit,
       teacherId,
       idProject,
-      idProject,
-      // idNotification,
+      idNotification,
     ],
     (err, results) => {
       if (err) {
         console.log(err);
+      } else {
+        let Test = [];
+        if (results[1].length > 0) {
+          function checkStatus(status) {
+            return status === 1;
+          }
+          results[1].map((result) => {
+            Test.push(result.status_state10);
+          });
+          const CheckIsOne = Test.every(checkStatus);
+          console.log(Test);
+          console.log(CheckIsOne);
+
+          if (CheckIsOne) {
+            db.query(
+              query_add_notification_advisor,
+              [`${idProject}`, stateName, results[2][0].id_teacher, idProject],
+              (err_notification, results_notification) => {
+                if (err_notification) {
+                  console.log(err_notification);
+                } else {
+                  res.send("Send Complete!!");
+                }
+              }
+            );
+            //res.send(Test);
+
+            // res.send({
+            //   status: true,
+            //   TestArray: Test,
+            //   message: "Hello true",
+            //   advisor: results[2][0].id_teacher,
+            // });
+          } else {
+            res.send({
+              status: false,
+              TestArray: Test,
+              message: "Hello false",
+            });
+          }
+        } else {
+          res.send("No data In this Project");
+        }
       }
-
-      res.send("complete");
-      // else {
-      //   let Test = [];
-      //   if (results[2].length > 0) {
-      //     function checkStatus(status) {
-      //       return status === 1;
-      //     }
-      //     results[2].map((result) => {
-      //       Test.push(result.status_state10);
-      //     });
-      //     const CheckIsOne = Test.every(checkStatus);
-      //     console.log(Test);
-      //     console.log(CheckIsOne);
-
-      //     if (CheckIsOne) {
-      //       // db.query(
-      //       //   query_add_notification_advisor,
-      //       //   [`${idProject}`, stateName, results[4][0].id_teacher, idProject],
-      //       //   (err_notification, results_notification) => {
-      //       //     if (err_notification) {
-      //       //       console.log(err_notification);
-      //       //     } else {
-      //       //       res.send("Send Complete!!");
-      //       //     }
-      //       //   }
-      //       // );
-      //       //res.send(Test);
-
-      //       // res.send({
-      //       //   status: true,
-      //       //   TestArray: Test,
-      //       //   message: "Hello true",
-      //       //   advisor: results[2][0].id_teacher,
-      //       // });
-      //     } else {
-      //       res.send({
-      //         status: false,
-      //         TestArray: Test,
-      //         message: "Hello false",
-      //       });
-      //     }
-      //   } else {
-      //     res.send("No data In this Project");
-      //   }
-      // }
     }
   );
+
+  // console.log(idProject)
+  // res.send("EIEI")
 });
+
+// router.put("/validation-state10-edit/:teacherId/:idProject", (req, res) => {
+//   const { idProject, teacherId } = req.params;
+//   const { idNotification, description, edit } = req.body;
+//   const stateName = "ยืนยันบันทึกผลการสอบโครงงาน";
+
+//   var query_validation_state10 =
+//     "UPDATE committee_project set status_state10=1 WHERE project_id=? AND id_teacher=?; ";
+
+//   var query_validation_state10_edit =
+//     "UPDATE final_exam_results SET exam_details=CONCAT(exam_details, ?) WHERE id_teacher=? and id_project=? ;  ";
+
+//   var query_delete_notification = "DELETE FROM notification WHERE id_noti = ?;";
+//   var query_status_state10 =
+//     "SELECT committee_project.status_state10 FROM committee_project WHERE project_id = ?; ";
+
+//   var query_get_advisor =
+//     "SELECT id_teacher FROM `committee_project` WHERE `project_id` = ? AND `role`='อาจารย์ที่ปรึกษา' ; ";
+//   var query_add_notification_advisor =
+//     "INSERT INTO notification (description,state_name,id_teacher,id_project) VALUES (?,?,?,?);";
+
+//   // //var query_add_log_notification =
+//   //   "INSERT INTO log_notifications (id_teacher,description) VALUES (?,?);";
+
+//   //console.log(idProject, idNotification, edit);
+
+//   db.query(
+//     query_validation_state10 +
+//       query_validation_state10_edit +
+//       query_get_advisor +
+//       query_status_state10,
+//     //query_delete_notification
+//     [
+//       idProject,
+//       teacherId,
+//       edit,
+//       teacherId,
+//       idProject,
+//       idProject,
+//       // idNotification,
+//     ],
+//     (err, results) => {
+//       if (err) {
+//         return res.send(err);
+//         console.log(err);
+//       }
+
+//       res.send(results[2]);
+//       // else {
+//       //   let Test = [];
+//       //   if (results[2].length > 0) {
+//       //     function checkStatus(status) {
+//       //       return status === 1;
+//       //     }
+//       //     results[2].map((result) => {
+//       //       Test.push(result.status_state10);
+//       //     });
+//       //     const CheckIsOne = Test.every(checkStatus);
+//       //     console.log(Test);
+//       //     console.log(CheckIsOne);
+
+//       //     if (CheckIsOne) {
+//       //       // db.query(
+//       //       //   query_add_notification_advisor,
+//       //       //   [`${idProject}`, stateName, results[4][0].id_teacher, idProject],
+//       //       //   (err_notification, results_notification) => {
+//       //       //     if (err_notification) {
+//       //       //       console.log(err_notification);
+//       //       //     } else {
+//       //       //       res.send("Send Complete!!");
+//       //       //     }
+//       //       //   }
+//       //       // );
+//       //       //res.send(Test);
+
+//       //       // res.send({
+//       //       //   status: true,
+//       //       //   TestArray: Test,
+//       //       //   message: "Hello true",
+//       //       //   advisor: results[2][0].id_teacher,
+//       //       // });
+//       //     } else {
+//       //       res.send({
+//       //         status: false,
+//       //         TestArray: Test,
+//       //         message: "Hello false",
+//       //       });
+//       //     }
+//       //   } else {
+//       //     res.send("No data In this Project");
+//       //   }
+//       // }
+//     }
+//   );
+// });
 
 router.get("/test", (req, res) => {
   console.log(__basedir);

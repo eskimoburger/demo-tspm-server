@@ -973,7 +973,6 @@ router.get("/get-asses-results/:idProject", (req, res) => {
   );
 });
 
-
 router.get("/get-asses-final/:idProject/:time", (req, res) => {
   const { idProject, time } = req.params;
   const query_asses =
@@ -982,6 +981,67 @@ router.get("/get-asses-final/:idProject/:time", (req, res) => {
   db.query(query_asses, [idProject, time], (err, results) => {
     if (err) throw err;
     res.send(results);
+  });
+});
+
+router.get("/research", (req, res) => {
+  const query_research = "SELECT * FROM test_research";
+  db.query(query_research, (err, results) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send(results);
+    }
+  });
+});
+
+router.post("/research-download", (req, res) => {
+  const file = req.body.file;
+  const path = __basedir + `/public/uploads/`;
+  console.log(file)
+  res.download(`${path}${file}`, (err) => {
+    if (err) {
+      res.status(500).send({
+        message: "File can not be downloaded: " + err,
+      });
+    }
+  });
+});
+
+router.post("/research/:idProject", (req, res) => {
+  const { idProject } = req.params;
+  const query_final_file =
+    "SELECT final_file FROM test_project_file WHERE id_project = ?;SELECT * FROM test_data_project WHERE id = ?;";
+  const query_add_research =
+    "INSERT INTO test_research(id_project,file_project,project_name_th,project_name_eng,project_description) VALUE (?,?,?,?,?); ";
+
+  db.query(query_final_file, [idProject, idProject], (err1, results1) => {
+    if (err1) {
+      res.send(err1);
+    } else {
+      if (results1[0].length === 0 && results1[1].length === 0) {
+        res.send("No data");
+      } else {
+        //res.send(results1);
+        db.query(
+          query_add_research,
+          [
+            idProject,
+            results1[0][0].final_file,
+            results1[1][0].project_name_th,
+            results1[1][0].project_name_eng,
+            results1[1][0].project_description,
+          ],
+          (err2, results2) => {
+            if (err2) {
+              res.send(err2);
+            } else {
+              res.send("Add data Complete");
+            }
+          }
+        );
+      }
+    }
   });
 });
 

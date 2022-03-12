@@ -147,7 +147,7 @@ router.post("/all", (req, res) => {
   );
 });
 
-router.post("/hello",  (req, res) => {
+router.post("/save-students",  (req, res) => {
 
     const testData = req.body.testData;
     
@@ -182,7 +182,7 @@ router.post("/hello",  (req, res) => {
     
 });
 
-router.post("/sendregyoyo", async (req, res) => {
+router.post("/send-reg-hash", async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
   const number = req.body.number;
