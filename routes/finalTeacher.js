@@ -447,12 +447,15 @@ router.put("/validation-state10/:teacherId/:idProject", (req, res) => {
   var query_add_notification_advisor =
     "INSERT INTO notification (description,state_name,id_teacher,id_project) VALUES (?,?,?,?);";
 
+  var query_get_project_data = "SELECT * FROM test_data_project WHERE id = ?;";
+
   db.query(
     query_update_final_status +
       query_status_state10 +
       query_get_advisor +
-      query_delete_notification,
-    [teacherId, idProject, idProject, idProject, idNotification],
+      query_delete_notification+
+      query_get_project_data,
+    [teacherId, idProject, idProject, idProject, idNotification,idProject],
     (err, results) => {
       if (err) {
         console.log(err);
@@ -468,11 +471,12 @@ router.put("/validation-state10/:teacherId/:idProject", (req, res) => {
           const CheckIsOne = Test.every(checkStatus);
           console.log(Test);
           console.log(CheckIsOne);
+          let MessageD = `${results[4][0].project_name_eng} ได้รับการตรวจสอบจากอาจารย์ประจำโครงงานทั้งหมดเรียบร้อยแล้ว`;
 
           if (CheckIsOne) {
             db.query(
               query_add_notification_advisor,
-              [`${idProject}`, stateName, results[2][0].id_teacher, idProject],
+              [MessageD, stateName, results[2][0].id_teacher, idProject],
               (err_notification, results_notification) => {
                 if (err_notification) {
                   console.log(err_notification);
@@ -532,12 +536,15 @@ router.put("/validation-state10-test/:teacherId/:idProject", (req, res) => {
   var query_validation_state10_edit =
     "UPDATE final_exam_results SET exam_details=CONCAT(exam_details, ?) WHERE id_teacher=? and id_project=? ;  ";
 
+  var query_get_project_data = "SELECT * FROM test_data_project WHERE id = ?;";
+
   db.query(
     query_update_final_status +
       query_status_state10 +
       query_get_advisor +
       query_validation_state10_edit +
-      query_delete_notification,
+      query_delete_notification +
+      query_get_project_data,
     [
       teacherId,
       idProject,
@@ -547,6 +554,7 @@ router.put("/validation-state10-test/:teacherId/:idProject", (req, res) => {
       teacherId,
       idProject,
       idNotification,
+      idProject,
     ],
     (err, results) => {
       if (err) {
@@ -563,11 +571,12 @@ router.put("/validation-state10-test/:teacherId/:idProject", (req, res) => {
           const CheckIsOne = Test.every(checkStatus);
           console.log(Test);
           console.log(CheckIsOne);
+          let MessageD = `${results[5][0].project_name_eng} ได้รับการตรวจสอบจากอาจารย์ประจำโครงงานทั้งหมดเรียบร้อยแล้ว`;
 
           if (CheckIsOne) {
             db.query(
               query_add_notification_advisor,
-              [`${idProject}`, stateName, results[2][0].id_teacher, idProject],
+              [MessageD, stateName, results[2][0].id_teacher, idProject],
               (err_notification, results_notification) => {
                 if (err_notification) {
                   console.log(err_notification);
