@@ -168,7 +168,7 @@ const EditUploadFileFinalState = async (req, res) => {
 };
 
 const getFilesList = (req, res) => {
-  var fullUrl = req.protocol + "://" + req.get("host");
+  var fullUrl = req.protocol + "s://" + req.get("host");
   const studentId = req.params.studentId;
   const path = __basedir + `/public/uploads/${studentId}/`;
 
